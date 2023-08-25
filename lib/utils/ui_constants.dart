@@ -26,4 +26,11 @@ abstract class UIConstants {
   ///Details page Overview section
   static const Color overviewSectionTextColor = Color(0x99FFFFFF);
   static const Color overviewTitleBackgroundColor = Color(0xFF37474F);
+
+  ///Genre Card styling
+  static const Color genreCardColor = Color(0x73000000);
+  static const double genreCardBorderRadius = 3;
+  static const Color genreCardBorderColor = Color(0xFF000000);
+  static const double genreCardBorderWidth = 2;
+  static const Color genreCardTextColor = Color(0xB3FFFFFF);
 }

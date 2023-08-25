@@ -4,12 +4,15 @@ class MoviePoster extends StatelessWidget {
   const MoviePoster({
     super.key,
     required this.pathToPosterImg,
+    required this.width,
+    required this.height,
   });
 
   final String pathToPosterImg;
-  static const double width = 200;
-  static const double height = 300;
+  final double width;
+  final double height;
   static const double borderWidth = 2;
+  static const String pathToPlaceholder = "images/placeholder.png";
 
   @override
   Widget build(BuildContext context) {
@@ -21,12 +24,24 @@ class MoviePoster extends StatelessWidget {
           border: Border.all(
             width: borderWidth,
           ),
-          image: DecorationImage(
-            image: AssetImage(
-              pathToPosterImg,
-            ),
-            fit: BoxFit.fill,
-          ),
+        ),
+        child: Image.asset(
+          pathToPosterImg,
+          height: height,
+          width: width,
+          fit: BoxFit.cover,
+          errorBuilder: (
+            BuildContext context,
+            Object exception,
+            StackTrace? stackTrace,
+          ) {
+            return Image.asset(
+              pathToPlaceholder,
+              width: width,
+              height: height,
+              fit: BoxFit.cover,
+            );
+          },
         ),
       ),
     );

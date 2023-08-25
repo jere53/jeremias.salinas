@@ -26,14 +26,12 @@ class MovieOverviewText extends StatelessWidget {
                 child: Container(
                   width: double.infinity,
                   color: UIConstants.overviewTitleBackgroundColor,
-                  child: const Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      overviewSectionTitle,
-                      style: TextStyle(
-                        fontSize: sectionTitleTextSize,
-                        color: UIConstants.overviewSectionTextColor,
-                      ),
+                  child: const Text(
+                    overviewSectionTitle,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: sectionTitleTextSize,
+                      color: UIConstants.overviewSectionTextColor,
                     ),
                   ),
                 ),
