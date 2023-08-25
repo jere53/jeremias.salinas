@@ -13,17 +13,24 @@ class DetailsBackdropSection extends StatelessWidget {
   final String pathToBackdropImg;
   final List<String> genres;
 
+  static const String pathToPlaceholder = "images/placeholder.png";
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
         Container(
           foregroundDecoration: decoration,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(pathToBackdropImg),
-              fit: BoxFit.cover,
-            ),
+          child: Image.asset(
+            pathToBackdropImg,
+            fit: BoxFit.cover,
+            errorBuilder: (BuildContext context, Object exception,
+                StackTrace? stackTrace) {
+              return Image.asset(
+                pathToPlaceholder,
+                fit: BoxFit.cover,
+              );
+            },
           ),
         ),
         GenreList(

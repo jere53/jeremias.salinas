@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../utils/ui_constants.dart';
 
 class GenreList extends StatelessWidget {
   const GenreList({
@@ -6,12 +7,7 @@ class GenreList extends StatelessWidget {
     required this.genres,
   });
 
-  static const Color cardColor = Colors.black45;
-  static const double cardBorderRadius = 3;
-  static const Color cardBorderColor = Colors.black;
-  static const double cardBorderWidth = 2;
   static const double listPadding = 4;
-  static const Color cardTextColor = Colors.white70;
   static const double height = 70;
   final List<String> genres;
 
@@ -32,14 +28,14 @@ class GenreList extends StatelessWidget {
   Widget buildListItem(String item) {
     return FittedBox(
       child: Card(
-        color: cardColor,
+        color: UIConstants.genreCardColor,
         child: Container(
           decoration: BoxDecoration(
-            borderRadius:
-                const BorderRadius.all(Radius.circular(cardBorderRadius)),
+            borderRadius: const BorderRadius.all(
+                Radius.circular(UIConstants.genreCardBorderRadius)),
             border: Border.all(
-              color: cardBorderColor,
-              width: cardBorderWidth,
+              color: UIConstants.genreCardBorderColor,
+              width: UIConstants.genreCardBorderWidth,
             ),
           ),
           child: Padding(
@@ -47,7 +43,7 @@ class GenreList extends StatelessWidget {
             child: Text(
               item,
               style: const TextStyle(
-                color: cardTextColor,
+                color: UIConstants.genreCardTextColor,
               ),
             ),
           ),

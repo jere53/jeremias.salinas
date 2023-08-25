@@ -9,10 +9,15 @@ class DetailsPosterSection extends StatelessWidget {
     super.key,
     required this.pathToPosterImg,
     required this.movieScore,
+    required this.voteCount,
   });
 
   final String pathToPosterImg;
   final String movieScore;
+  final int voteCount;
+
+  static const double posterHeight = 300;
+  static const double posterWidth = 200;
 
   @override
   Widget build(BuildContext context) {
@@ -24,12 +29,15 @@ class DetailsPosterSection extends StatelessWidget {
         children: [
           MoviePoster(
             pathToPosterImg: pathToPosterImg,
+            height: posterHeight,
+            width: posterWidth,
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               MovieScore(
                 movieScore: movieScore,
+                voteCount: voteCount,
               ),
               const LikeCounter(),
             ],
