@@ -27,7 +27,8 @@ class MovieScore extends StatelessWidget {
 
   static const maxVoteNumber = 99999;
 
-  String _getFormattedVoteCount() {
+  @visibleForTesting
+  String getFormattedVoteCount() {
     if (voteCount > maxVoteNumber) {
       return '$maxVoteNumber+ votes';
     }
@@ -60,7 +61,7 @@ class MovieScore extends StatelessWidget {
               flex: voteCountFlex,
               child: Text(
                 textAlign: TextAlign.center,
-                _getFormattedVoteCount(),
+                getFormattedVoteCount(),
                 style: voteCountTextStyle,
               ),
             )

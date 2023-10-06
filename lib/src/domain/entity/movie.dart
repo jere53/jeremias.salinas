@@ -33,25 +33,27 @@ class Movie {
     required this.voteCount,
   });
 
+  static const emptyString = '';
+
   factory Movie.fromJson(Map<String, dynamic> json) {
     final List<int> genreIDs = List<int>.from(
-      json['genre_ids'],
+      json['genre_ids'] ?? [],
     );
     return Movie(
-      title: json['title'],
-      originalTitle: json['original_title'],
-      overview: json['overview'],
-      releaseDate: json['release_date'],
-      voteAverage: json['vote_average'].toDouble(),
+      title: json['title'] ?? emptyString,
+      originalTitle: json['original_title'] ?? emptyString,
+      overview: json['overview'] ?? emptyString,
+      releaseDate: json['release_date'] ?? emptyString,
+      voteAverage: json['vote_average']?.toDouble() ?? 0.0,
       genres: genreIDs,
-      pathToBackdropImg: json['backdrop_path'],
-      pathToPosterImg: json['poster_path'],
-      adult: json['adult'],
-      originalLanguage: json['original_language'],
-      id: json['id'],
-      popularity: json['popularity'].toDouble(),
-      video: json['video'],
-      voteCount: json['vote_count'],
+      pathToBackdropImg: json['backdrop_path'] ?? emptyString,
+      pathToPosterImg: json['poster_path'] ?? emptyString,
+      adult: json['adult'] ?? false,
+      originalLanguage: json['original_language'] ?? emptyString,
+      id: json['id'] ?? 0,
+      popularity: json['popularity']?.toDouble() ?? 0.0,
+      video: json['video'] ?? false,
+      voteCount: json['vote_count'] ?? 0,
     );
   }
 

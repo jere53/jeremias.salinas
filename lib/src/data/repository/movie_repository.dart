@@ -1,5 +1,9 @@
 import 'dart:convert';
+
 import 'package:flutter/services.dart';
+
+import '../../core/util/data_state.dart';
+import '../../core/util/enums.dart';
 import '../../domain/entity/genre.dart';
 import '../../domain/entity/movie.dart';
 import '../../domain/repository/i_movie_repository.dart';
@@ -12,19 +16,37 @@ class MovieRepository implements IMovieRepository {
   static const String moviesJsonPath = 'mock_data/movies.json';
 
   @override
-  Future<List<Movie>?> getMovies() async {
+  Future<DataState<List<Movie>>> getMovies([
+    int page = 1,
+    MovieEndpoint _ = MovieEndpoint.popular,
+  ]) async {
     if (movies == null) {
-      await _loadMoviesFromJson();
+      try {
+        await _loadMoviesFromJson();
+      } catch (e) {
+        return DataFailed(Exception('failed to fetch movies'));
+      }
     }
-    return movies;
+
+    return DataSuccess(movies ?? []);
   }
 
   Future<List<Movie>?> _loadMoviesFromJson() async {
-    final String genreData = await rootBundle.loadString(genresJsonPath);
     final String movieData = await rootBundle.loadString(moviesJsonPath);
 
-    final Map<String, dynamic> decodedGenreData =
-        jsonDecode(genreData);
+    final List<Map<String, dynamic>> movieList =
+        List.from(jsonDecode(movieData));
+
+    return movies = movieList
+        .map(
+          (e) => Movie.fromJson(e),
+        )
+        .toList();
+  }
+
+  Future<void> _loadGenresFromJson() async {
+    final String genreData = await rootBundle.loadString(genresJsonPath);
+    final Map<String, dynamic> decodedGenreData = jsonDecode(genreData);
 
     final List<Map<String, dynamic>> genreList =
         List.from(decodedGenreData['genres']);
@@ -34,10 +56,44 @@ class MovieRepository implements IMovieRepository {
     ).toList();
 
     GenreModel.validGenres = genres;
+  }
 
-    final List<Map<String, dynamic>> movieList =
-        List.from(jsonDecode(movieData));
+  @override
+  Future<DataState<List<Movie>>> getMoviesByGenre(
+    int genre, [
+    int page = 1,
+  ]) async {
+    final dataState = await getMovies(page);
+    if (dataState is DataSuccess) {
+      return DataSuccess(
+        dataState.data!
+            .where(
+              (movie) => movie.genres.contains(
+                GenreModel.validGenres
+                    .firstWhere(
+                      (validGenre) => validGenre.id == genre,
+                    )
+                    .id,
+              ),
+            )
+            .toList(),
+      );
+    } else {
+      return DataFailed(
+        Exception('failed to fetch movies by genre'),
+      );
+    }
+  }
 
-    return movies = movieList.map((e) => Movie.fromJson(e)).toList();
+  @override
+  Future<DataState<List<Genre>>> getValidGenres() async {
+    try {
+      await _loadGenresFromJson();
+      return DataSuccess(
+        GenreModel.validGenres,
+      );
+    } on Exception catch (e) {
+      return DataFailed(e);
+    }
   }
 }

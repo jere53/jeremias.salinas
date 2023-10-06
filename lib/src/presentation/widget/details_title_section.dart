@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:movie_app_jsalinas/src/presentation/widget/release_date_text.dart';
 
 import 'movie_title_text.dart';
+import 'release_date_text.dart';
 
 class DetailsTitleSection extends StatelessWidget {
   const DetailsTitleSection({

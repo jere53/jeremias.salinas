@@ -9,8 +9,8 @@ class Genre {
 
   factory Genre.fromJson(Map<String, dynamic> json) {
     return Genre(
-      json['id'],
-      json['name'],
+      json['id'] ?? 0,
+      json['name'] ?? '',
     );
   }
 }

@@ -9,22 +9,23 @@ class LikeCounter extends StatefulWidget {
   const LikeCounter({super.key});
 
   @override
-  State<StatefulWidget> createState() => _LikeCounterState();
+  State<StatefulWidget> createState() => LikeCounterState();
 }
 
-class _LikeCounterState extends State<LikeCounter> {
+@visibleForTesting
+class LikeCounterState extends State<LikeCounter> {
   static const buttonTextStyle = TextStyle(
     color: Colors.white,
     fontWeight: FontWeight.bold,
     fontSize: 20,
   );
-  int _likeCount = 0;
+  int likeCount = 0;
 
-  _LikeCounterState();
+  LikeCounterState();
 
   void _incrementLikes() {
     setState(() {
-      _likeCount++;
+      likeCount++;
     });
   }
 
@@ -33,31 +34,34 @@ class _LikeCounterState extends State<LikeCounter> {
     return Stack(
       alignment: Alignment.topCenter,
       children: [
-        InkWell(
-          onTap: _incrementLikes,
-          customBorder: const CircleBorder(),
-          child: Ink(
-            decoration: const BoxDecoration(
-              color: Colors.redAccent,
-              shape: BoxShape.circle,
-            ),
-            height: LikeCounter.iconSize,
-            width: LikeCounter.iconSize,
-            child: Align(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    textAlign: TextAlign.center,
-                    LikeCounter.buttonText,
-                    style: buttonTextStyle,
-                  ),
-                  Text(
-                    textAlign: TextAlign.center,
-                    '$_likeCount',
-                    style: buttonTextStyle,
-                  ),
-                ],
+        Material(
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: InkWell(
+            onTap: _incrementLikes,
+            customBorder: const CircleBorder(),
+            child: Ink(
+              decoration: const BoxDecoration(
+                color: Colors.redAccent,
+                shape: BoxShape.circle,
+              ),
+              height: LikeCounter.iconSize,
+              width: LikeCounter.iconSize,
+              child: Align(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      textAlign: TextAlign.center,
+                      LikeCounter.buttonText,
+                      style: buttonTextStyle,
+                    ),
+                    Text(
+                      textAlign: TextAlign.center,
+                      '$likeCount',
+                      style: buttonTextStyle,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

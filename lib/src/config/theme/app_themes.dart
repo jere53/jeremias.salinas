@@ -13,11 +13,14 @@ abstract class AppTheme {
         color: Colors.blueGrey.shade900,
       ),
       scaffoldBackgroundColor: Colors.blueGrey.shade900,
+      dialogBackgroundColor: Colors.blueGrey.shade700,
       primaryColor: Colors.white70,
       primaryColorLight: Colors.blueGrey.shade800,
       splashColor: Colors.transparent,
       fontFamily: 'IBM',
-      colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.white70),
+      colorScheme: ColorScheme.fromSwatch().copyWith(
+        secondary: Colors.white70,
+      ),
       cardColor: Colors.blueGrey.shade800,
       textTheme: TextTheme(
         displaySmall: TextStyle(

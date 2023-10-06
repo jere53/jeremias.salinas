@@ -1,7 +1,6 @@
 import 'dart:ui' show Color;
 
 abstract class UIConstants {
-
   ///Details page Title section
   static const Color titleSectionTextColor = Color(0xFFFFFFFF);
 
@@ -15,4 +14,5 @@ abstract class UIConstants {
   static const double genreCardBorderRadius = 3;
   static const double genreCardBorderWidth = 2;
   static const Color genreCardTextColor = Color(0xB3FFFFFF);
+  static const Color genreCardColor = Color(0x73000000);
 }

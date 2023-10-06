@@ -1,4 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+
+import '../../../src/core/util/constants.dart' as constants;
 
 class MoviePoster extends StatelessWidget {
   const MoviePoster({
@@ -6,13 +10,14 @@ class MoviePoster extends StatelessWidget {
     required this.pathToPosterImg,
     required this.width,
     required this.height,
+    this.cacheManager,
   });
 
+  final BaseCacheManager? cacheManager;
   final String pathToPosterImg;
   final double width;
   final double height;
   static const double borderWidth = 2;
-  static const String pathToPlaceholder = "images/placeholder.png";
 
   @override
   Widget build(BuildContext context) {
@@ -25,23 +30,49 @@ class MoviePoster extends StatelessWidget {
             width: borderWidth,
           ),
         ),
-        child: Image.asset(
-          pathToPosterImg,
-          height: height,
+        child: SizedBox(
           width: width,
-          fit: BoxFit.cover,
-          errorBuilder: (
-            BuildContext context,
-            Object exception,
-            StackTrace? stackTrace,
-          ) {
-            return Image.asset(
-              pathToPlaceholder,
-              width: width,
-              height: height,
-              fit: BoxFit.cover,
-            );
-          },
+          height: height,
+          child: CachedNetworkImage(
+            cacheManager: cacheManager ?? DefaultCacheManager(),
+            progressIndicatorBuilder: (
+              context,
+              url,
+              progress,
+            ) {
+              return Center(
+                child: CircularProgressIndicator(
+                  value: progress.progress,
+                ),
+              );
+            },
+            imageUrl: '${constants.baseImgUrl}$pathToPosterImg',
+            imageBuilder: (
+              context,
+              imageProvider,
+            ) {
+              return Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              );
+            },
+            errorWidget: (
+              context,
+              url,
+              error,
+            ) {
+              return Image.asset(
+                constants.pathToPlaceholderImg,
+                width: width,
+                height: height,
+                fit: BoxFit.cover,
+              );
+            },
+          ),
         ),
       ),
     );
