@@ -1,188 +1,90 @@
 import 'package:flutter/material.dart';
-import '../../../src/domain/repository/i_movie_repository.dart';
 
-import '../../core/util/ui_constants.dart';
-import '../../data/model/genre_model.dart';
-import '../../domain/entity/genre.dart';
 import '../../domain/entity/movie.dart';
-import '../widget/movie_poster.dart';
-import '../widget/movie_score.dart';
-import 'details_view.dart';
+import '../../domain/usecase/implementation/movies_from_endpoint_usecase.dart';
+import '../../domain/usecase/implementation/valid_genres_usecase.dart';
+import '../bloc/movie_from_endpoint_bloc.dart';
+import '../widget/genre_drawer.dart';
+import '../widget/movies_from_endpoint_grid_view.dart';
 
 class MoviesView extends StatefulWidget {
+  final MoviesFromEndpointUseCase moviesUseCase;
+  final ValidGenresUseCase validGenresUseCase;
+
   const MoviesView({
     super.key,
-    required this.repository,
+    required this.moviesUseCase,
+    required this.validGenresUseCase,
   });
 
-  final IMovieRepository repository;
-
-  static const double borderRadius = 4;
-  static const double rowPadding = 15;
-  static const double posterHeight = 150 * 1.3;
-  static const double posterWidth = 100 * 1.3;
-  static const double imageSpacing = 20;
-  static const double textSpacing = 5;
-  static const double titleFontSize = 20;
-  static const double scoreIconScale = 0.7;
-  static const int displayedGenresAmount = 3;
-  static const double genreCardPadding = 2;
-  static const Text noDataText = Text('No data');
+  static int amt = 0;
 
   @override
   State<MoviesView> createState() => _MoviesViewState();
 }
 
-class _MoviesViewState extends State<MoviesView> {
-  late Future<List<Movie>?> movies;
+class _MoviesViewState extends State<MoviesView>
+    with AutomaticKeepAliveClientMixin {
+  late final MoviesFromEndpointBloc movieBloc;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
+    movieBloc = MoviesFromEndpointBloc(
+      moviesUseCase: widget.moviesUseCase,
+      validGenresUseCase: widget.validGenresUseCase,
+    );
     super.initState();
-    movies = widget.repository.getMovies();
-  }
-  Card _buildMovieCard(Movie movie) {
-    final String releaseYear = DateTime.parse(movie.releaseDate).year.toString();
-
-    return Card(
-      color: Theme.of(context).cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(MoviesView.borderRadius),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(MoviesView.rowPadding),
-            child: Row(
-              children: <Widget>[
-                MoviePoster(
-                  pathToPosterImg: movie.pathToPosterImg,
-                  width: MoviesView.posterWidth,
-                  height: MoviesView.posterHeight,
-                ),
-                Container(width: MoviesView.imageSpacing),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Container(height: MoviesView.textSpacing),
-                      Text(
-                        movie.title,
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                      Container(height: MoviesView.textSpacing),
-                      Text(
-                        releaseYear,
-                        style: Theme.of(context).textTheme.displaySmall,
-                      ),
-                      Container(height: MoviesView.textSpacing),
-                      Wrap(
-                        children: _buildGenresList(genres: movie.genres),
-                      ),
-                      Center(
-                        child: Transform.scale(
-                          scale: MoviesView.scoreIconScale,
-                          child: MovieScore(
-                            movieScore: movie.score,
-                            voteCount: movie.voteCount,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
-  List<Widget> _buildGenresList({required List<int> genres}) {
-    final children = <Widget>[];
-    final transformedGenres = <Genre>[];
-    transformedGenres.addAll(
-      GenreModel.validGenres.where(
-            (g) => genres.contains(
-          g.id,
-        ),
-      ),
-    );
-    for (final Genre genre in transformedGenres) {
-      children.add(_buildGenreCard(genre));
-    }
-    return children;
-  }
-
-  Card _buildGenreCard(Genre genre) {
-    return Card(
-      color: Theme.of(context).cardTheme.color,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(
-            Radius.circular(UIConstants.genreCardBorderRadius),
-          ),
-          border: Border.all(
-            width: UIConstants.genreCardBorderWidth,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(MoviesView.genreCardPadding),
-          child: Text(
-            genre.name,
-            style: const TextStyle(
-              color: UIConstants.genreCardTextColor,
-            ),
-          ),
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    movieBloc.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Movie>?>(
-      future: movies,
-      builder: (
-          BuildContext context,
-          AsyncSnapshot<List<Movie>?> snapshot,
+    super.build(context);
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            movieBloc.viewTitle(),
+          ),
+        ),
+        drawer: GenreDrawer(
+          futureValidGenreList: movieBloc.fetchValidGenres(),
+        ),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: StreamBuilder<List<Movie>>(
+          initialData: movieBloc.movies,
+          stream: movieBloc.moviesStream,
+          builder: (
+            BuildContext context,
+            AsyncSnapshot<List<Movie>> snapshot,
           ) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              movieBloc.fetchMovies();
 
-        if (snapshot.hasData) {
-          final List<Movie> movies = snapshot.data!;
-          movies.add(Movie.fromStatic());
+              return const CircularProgressIndicator();
+            }
 
-          return Scaffold(
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            body: SafeArea(
-              child: ListView(
-                children: [
-                  for (Movie movie in movies)
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailsView(
-                              movie: movie,
-                            ),
-                          ),
-                        );
-                      },
-                      child: _buildMovieCard(movie),
-                    ),
-                ],
-              ),
-            ),
-          );
-        }
-        return MoviesView.noDataText;
-      },
+            if (snapshot.hasData) {
+              final List<Movie> movies = snapshot.data!;
+              final Widget list = MoviesFromEndpointGridView(
+                movies: movies,
+                movieBloc: movieBloc,
+              );
+              return list;
+            }
+
+            return const Text('error');
+          },
+        ),
+      ),
     );
   }
 }

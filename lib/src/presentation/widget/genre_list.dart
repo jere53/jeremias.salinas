@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/util/ui_constants.dart';
+import 'genre_card.dart';
 
 class GenreList extends StatelessWidget {
   const GenreList({
@@ -8,38 +8,8 @@ class GenreList extends StatelessWidget {
     required this.genres,
   });
 
-  static const double listPadding = 4;
   static const double height = 70;
-  static const Color genreCardColor = Colors.black45;
-
   final List<String> genres;
-
-  Widget buildListItem(String item) {
-    return FittedBox(
-      child: Card(
-        color: genreCardColor,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(UIConstants.genreCardBorderRadius),
-            ),
-            border: Border.all(
-              width: UIConstants.genreCardBorderWidth,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(listPadding),
-            child: Text(
-              item,
-              style: const TextStyle(
-                color: UIConstants.genreCardTextColor,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +19,7 @@ class GenreList extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         physics: const ScrollPhysics(),
         children: [
-          for (String item in genres) buildListItem(item),
+          for (String item in genres) GenreCard(item: item),
         ],
       ),
     );

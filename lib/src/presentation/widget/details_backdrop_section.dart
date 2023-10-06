@@ -1,5 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
+import '../../../src/core/util/constants.dart' as constants;
 import 'genre_list.dart';
 
 class DetailsBackdropSection extends StatelessWidget {
@@ -8,13 +11,13 @@ class DetailsBackdropSection extends StatelessWidget {
     required this.pathToBackdropImg,
     required this.genres,
     required this.decoration,
+    this.cacheManager,
   });
 
+  final BaseCacheManager? cacheManager;
   final BoxDecoration decoration;
   final String pathToBackdropImg;
   final List<String> genres;
-
-  static const String pathToPlaceholder = "images/placeholder.png";
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +25,40 @@ class DetailsBackdropSection extends StatelessWidget {
       children: [
         Container(
           foregroundDecoration: decoration,
-          child: Image.asset(
-            pathToBackdropImg,
-            fit: BoxFit.cover,
-            errorBuilder: (
-              BuildContext context,
-              Object exception,
-              StackTrace? stackTrace,
+          child: CachedNetworkImage(
+            cacheManager: cacheManager ?? DefaultCacheManager(),
+            progressIndicatorBuilder: (
+              context,
+              url,
+              progress,
+            ) {
+              return Center(
+                child: CircularProgressIndicator(
+                  value: progress.progress,
+                ),
+              );
+            },
+            imageUrl: '${constants.baseImgUrl}$pathToBackdropImg',
+            imageBuilder: (
+              context,
+              imageProvider,
+            ) {
+              return Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              );
+            },
+            errorWidget: (
+              context,
+              url,
+              error,
             ) {
               return Image.asset(
-                pathToPlaceholder,
+                constants.pathToPlaceholderImg,
                 fit: BoxFit.cover,
               );
             },

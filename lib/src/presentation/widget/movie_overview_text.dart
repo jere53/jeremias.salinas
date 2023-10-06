@@ -14,11 +14,13 @@ class MovieOverviewText extends StatelessWidget {
   });
 
   final String movieOverviewTxt;
+  static const double sectionHeight = 300;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      //FIXME replace with a NestedScrollView
+    return SizedBox(
+      width: double.infinity,
+      height: sectionHeight,
       child: SingleChildScrollView(
         child: IntrinsicHeight(
           child: Column(
