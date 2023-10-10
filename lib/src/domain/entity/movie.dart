@@ -1,6 +1,7 @@
 import 'package:floor/floor.dart';
 
 import '../../core/util/enums.dart';
+import '../../data/datasource/local/list_of_int_converter.dart';
 
 @entity
 class Movie {
@@ -9,7 +10,9 @@ class Movie {
   final String overview;
   final String releaseDate;
   final double voteAverage;
+
   final List<int> genres;
+
   final String pathToBackdropImg;
   final String pathToPosterImg;
   final bool adult;

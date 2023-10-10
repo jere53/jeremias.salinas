@@ -11,9 +11,17 @@ abstract class MovieDao {
     MovieEndpoint endpoint,
   );
 
-  @Query('SELECT * FROM Movie WHERE (page = :page AND genre = :genre)')
+  @Query('SELECT * FROM Movie')
+  Future<List<Movie>> fetchAllMovies(
+      );
+
+  @Query("SELECT * FROM Movie WHERE :page > -2 AND instr(genres, :genre) > 0")
+  //FIXME figure out how to implement paging
   Future<List<Movie>> fetchMoviesByGenre(
-      int genre,
+      String genre,
       int page,
       );
+
+  @Insert(onConflict: OnConflictStrategy.replace)
+  Future<void> insertMovie(Movie movie);
 }

@@ -1,4 +1,5 @@
 import '../../../src/domain/entity/movie.dart';
+import '../../core/util/enums.dart';
 
 class ResponseModel {
   int page;
@@ -13,10 +14,14 @@ class ResponseModel {
     required this.results,
   });
 
-  factory ResponseModel.fromJson(Map<String, dynamic> parsedJson) {
+  factory ResponseModel.fromJson(
+    Map<String, dynamic> parsedJson, [
+    int page = 0,
+    MovieEndpoint endpoint = MovieEndpoint.popular,
+  ]) {
     final parsedResults = List<Movie>.from(
       parsedJson['results']?.map(
-            (movie) => Movie.fromJson(movie),
+            (movie) => Movie.fromJson(movie, page, endpoint),
           ) ??
           [],
     );

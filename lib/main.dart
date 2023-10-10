@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 
 import 'src/config/route/app_routes.dart';
 import 'src/config/theme/app_themes.dart';
+import 'src/data/datasource/local/movie_database.dart';
 import 'src/data/datasource/remote/movie_api_service.dart';
 import 'src/data/repository/movie_api_repository.dart';
 import 'src/domain/repository/i_movie_repository.dart';
 
-void main() {
-  final IMovieRepository repository = MovieApiRepository(MovieApiService());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final database =
+      await $FloorMovieDatabase.databaseBuilder('movie_database.db').build();
+  final repository = MovieApiRepository(MovieApiService(
+    movieDao: database.movieDao,
+    genreDao: database.genreDao,
+  ));
+
   runApp(
     MyApp(
       repository: repository,

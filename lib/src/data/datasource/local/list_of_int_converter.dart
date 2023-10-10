@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:floor/floor.dart';
 
-class GenresConverter extends TypeConverter<List<int>, String> {
+class ListOfIntConverter extends TypeConverter<List<int>, String> {
   @override
   List<int> decode(String databaseValue) {
     final json = jsonDecode(databaseValue) as List<dynamic>;

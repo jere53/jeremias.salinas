@@ -10,8 +10,15 @@ import '../../../domain/entity/genre.dart';
 import '../../../domain/entity/movie.dart';
 import '../../model/genre_model.dart';
 import '../../model/response_model.dart';
+import '../local/DAOs/genre_dao.dart';
+import '../local/DAOs/movie_dao.dart';
 
 class MovieApiService {
+  final MovieDao movieDao;
+  final GenreDao genreDao;
+
+  MovieApiService({required this.movieDao, required this.genreDao});
+
   Future<List<Movie>> fetchMovies(
     int page,
     MovieEndpoint endpoint,
@@ -26,14 +33,19 @@ class MovieApiService {
         ),
       );
       if (response.statusCode == HttpStatus.ok) {
-        return ResponseModel.fromJson(
+        final res = ResponseModel.fromJson(
           json.decode(response.body),
+          page,
+          endpoint,
         ).results;
-      } else {
-        throw Exception('Failed to fetch movies');
+        for (final movie in res) {
+          movieDao.insertMovie(movie);
+        }
       }
+
+      return movieDao.fetchMovies(page, endpoint);
     } catch (e) {
-      rethrow;
+      return movieDao.fetchMovies(page, endpoint);
     } finally {
       client.close();
     }
@@ -51,14 +63,18 @@ class MovieApiService {
         final List<Map<String, dynamic>> genreList = List.from(
           json.decode(response.body)['genres'],
         );
-        return GenreModel.validGenres = GenreModel.fromJson(
+
+        GenreModel.validGenres = GenreModel.fromJson(
           genreList,
         );
-      } else {
-        throw Exception('Failed to get genre data');
+
+        for(final genre in GenreModel.validGenres){
+          genreDao.insertGenre(genre);
+        }
       }
+      return genreDao.fetchGenres();
     } catch (e) {
-      rethrow;
+      return genreDao.fetchGenres();
     } finally {
       client.close();
     }
@@ -79,14 +95,24 @@ class MovieApiService {
         ),
       );
       if (response.statusCode == HttpStatus.ok) {
-        return ResponseModel.fromJson(
+        final res = ResponseModel.fromJson(
           json.decode(response.body),
         ).results;
-      } else {
-        throw Exception('Failed to fetch movies by genre');
+
+        for(final movie in res){
+          movieDao.insertMovie(movie);
+        }
       }
+
+      return movieDao.fetchMoviesByGenre(
+        '$genre',
+        page,
+      );
     } catch (e) {
-      rethrow;
+      return movieDao.fetchMoviesByGenre(
+        '$genre',
+        page,
+      );
     } finally {
       client.close();
     }

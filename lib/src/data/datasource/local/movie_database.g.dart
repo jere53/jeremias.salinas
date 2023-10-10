@@ -112,13 +112,36 @@ class _$MovieDao extends MovieDao {
   _$MovieDao(
     this.database,
     this.changeListener,
-  ) : _queryAdapter = QueryAdapter(database);
+  )   : _queryAdapter = QueryAdapter(database),
+        _movieInsertionAdapter = InsertionAdapter(
+            database,
+            'Movie',
+            (Movie item) => <String, Object?>{
+                  'title': item.title,
+                  'originalTitle': item.originalTitle,
+                  'overview': item.overview,
+                  'releaseDate': item.releaseDate,
+                  'voteAverage': item.voteAverage,
+                  'genres': _listOfIntConverter.encode(item.genres),
+                  'pathToBackdropImg': item.pathToBackdropImg,
+                  'pathToPosterImg': item.pathToPosterImg,
+                  'adult': item.adult ? 1 : 0,
+                  'originalLanguage': item.originalLanguage,
+                  'id': item.id,
+                  'popularity': item.popularity,
+                  'video': item.video ? 1 : 0,
+                  'voteCount': item.voteCount,
+                  'page': item.page,
+                  'endpoint': item.endpoint.index
+                });
 
   final sqflite.DatabaseExecutor database;
 
   final StreamController<String> changeListener;
 
   final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<Movie> _movieInsertionAdapter;
 
   @override
   Future<List<Movie>> fetchMovies(
@@ -133,7 +156,7 @@ class _$MovieDao extends MovieDao {
             overview: row['overview'] as String,
             releaseDate: row['releaseDate'] as String,
             voteAverage: row['voteAverage'] as double,
-            genres: _genresConverter.decode(row['genres'] as String),
+            genres: _listOfIntConverter.decode(row['genres'] as String),
             pathToBackdropImg: row['pathToBackdropImg'] as String,
             pathToPosterImg: row['pathToPosterImg'] as String,
             adult: (row['adult'] as int) != 0,
@@ -148,19 +171,41 @@ class _$MovieDao extends MovieDao {
   }
 
   @override
-  Future<List<Movie>> fetchMoviesByGenre(
-    int genre,
-    int page,
-  ) async {
-    return _queryAdapter.queryList(
-        'SELECT * FROM Movie WHERE (page = ?2 AND genre = ?1)',
+  Future<List<Movie>> fetchAllMovies() async {
+    return _queryAdapter.queryList('SELECT * FROM Movie',
         mapper: (Map<String, Object?> row) => Movie(
             title: row['title'] as String,
             originalTitle: row['originalTitle'] as String,
             overview: row['overview'] as String,
             releaseDate: row['releaseDate'] as String,
             voteAverage: row['voteAverage'] as double,
-            genres: _genresConverter.decode(row['genres'] as String),
+            genres: _listOfIntConverter.decode(row['genres'] as String),
+            pathToBackdropImg: row['pathToBackdropImg'] as String,
+            pathToPosterImg: row['pathToPosterImg'] as String,
+            adult: (row['adult'] as int) != 0,
+            originalLanguage: row['originalLanguage'] as String,
+            id: row['id'] as int,
+            popularity: row['popularity'] as double,
+            video: (row['video'] as int) != 0,
+            voteCount: row['voteCount'] as int,
+            page: row['page'] as int,
+            endpoint: MovieEndpoint.values[row['endpoint'] as int]));
+  }
+
+  @override
+  Future<List<Movie>> fetchMoviesByGenre(
+    String genre,
+    int page,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM Movie WHERE ?2 > -2 AND instr(genres, ?1) > 0',
+        mapper: (Map<String, Object?> row) => Movie(
+            title: row['title'] as String,
+            originalTitle: row['originalTitle'] as String,
+            overview: row['overview'] as String,
+            releaseDate: row['releaseDate'] as String,
+            voteAverage: row['voteAverage'] as double,
+            genres: _listOfIntConverter.decode(row['genres'] as String),
             pathToBackdropImg: row['pathToBackdropImg'] as String,
             pathToPosterImg: row['pathToPosterImg'] as String,
             adult: (row['adult'] as int) != 0,
@@ -173,13 +218,23 @@ class _$MovieDao extends MovieDao {
             endpoint: MovieEndpoint.values[row['endpoint'] as int]),
         arguments: [genre, page]);
   }
+
+  @override
+  Future<void> insertMovie(Movie movie) async {
+    await _movieInsertionAdapter.insert(movie, OnConflictStrategy.replace);
+  }
 }
 
 class _$GenreDao extends GenreDao {
   _$GenreDao(
     this.database,
     this.changeListener,
-  ) : _queryAdapter = QueryAdapter(database);
+  )   : _queryAdapter = QueryAdapter(database),
+        _genreInsertionAdapter = InsertionAdapter(
+            database,
+            'Genre',
+            (Genre item) =>
+                <String, Object?>{'id': item.id, 'name': item.name});
 
   final sqflite.DatabaseExecutor database;
 
@@ -187,13 +242,20 @@ class _$GenreDao extends GenreDao {
 
   final QueryAdapter _queryAdapter;
 
+  final InsertionAdapter<Genre> _genreInsertionAdapter;
+
   @override
   Future<List<Genre>> fetchGenres() async {
     return _queryAdapter.queryList('SELECT * FROM Genre',
         mapper: (Map<String, Object?> row) =>
             Genre(row['id'] as int, row['name'] as String));
   }
+
+  @override
+  Future<void> insertGenre(Genre genre) async {
+    await _genreInsertionAdapter.insert(genre, OnConflictStrategy.replace);
+  }
 }
 
 // ignore_for_file: unused_element
-final _genresConverter = GenresConverter();
+final _listOfIntConverter = ListOfIntConverter();
