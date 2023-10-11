@@ -1,9 +1,8 @@
 import 'package:floor/floor.dart';
 
 import '../../core/util/enums.dart';
-import '../../data/datasource/local/list_of_int_converter.dart';
 
-@entity
+@Entity(primaryKeys: ['id', 'endpoint'])
 class Movie {
   final String title;
   final String originalTitle;
@@ -18,7 +17,6 @@ class Movie {
   final bool adult;
   final String originalLanguage;
 
-  @primaryKey
   final int id;
 
   final double popularity;

@@ -5,9 +5,8 @@ import '../../../../domain/entity/movie.dart';
 
 @dao
 abstract class MovieDao {
-  @Query('SELECT * FROM Movie WHERE (page = :page AND endpoint = :endpoint)')
+  @Query('SELECT * FROM Movie WHERE (endpoint = :endpoint) ORDER BY page')
   Future<List<Movie>> fetchMovies(
-    int page,
     MovieEndpoint endpoint,
   );
 
@@ -15,11 +14,9 @@ abstract class MovieDao {
   Future<List<Movie>> fetchAllMovies(
       );
 
-  @Query("SELECT * FROM Movie WHERE :page > -2 AND instr(genres, :genre) > 0")
-  //FIXME figure out how to implement paging
+  @Query("SELECT * FROM Movie WHERE instr(genres, :genre) > 0 ORDER BY page")
   Future<List<Movie>> fetchMoviesByGenre(
       String genre,
-      int page,
       );
 
   @Insert(onConflict: OnConflictStrategy.replace)

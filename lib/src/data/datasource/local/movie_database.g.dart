@@ -87,7 +87,7 @@ class _$MovieDatabase extends MovieDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Movie` (`title` TEXT NOT NULL, `originalTitle` TEXT NOT NULL, `overview` TEXT NOT NULL, `releaseDate` TEXT NOT NULL, `voteAverage` REAL NOT NULL, `genres` TEXT NOT NULL, `pathToBackdropImg` TEXT NOT NULL, `pathToPosterImg` TEXT NOT NULL, `adult` INTEGER NOT NULL, `originalLanguage` TEXT NOT NULL, `id` INTEGER NOT NULL, `popularity` REAL NOT NULL, `video` INTEGER NOT NULL, `voteCount` INTEGER NOT NULL, `page` INTEGER NOT NULL, `endpoint` INTEGER NOT NULL, PRIMARY KEY (`id`))');
+            'CREATE TABLE IF NOT EXISTS `Movie` (`title` TEXT NOT NULL, `originalTitle` TEXT NOT NULL, `overview` TEXT NOT NULL, `releaseDate` TEXT NOT NULL, `voteAverage` REAL NOT NULL, `genres` TEXT NOT NULL, `pathToBackdropImg` TEXT NOT NULL, `pathToPosterImg` TEXT NOT NULL, `adult` INTEGER NOT NULL, `originalLanguage` TEXT NOT NULL, `id` INTEGER NOT NULL, `popularity` REAL NOT NULL, `video` INTEGER NOT NULL, `voteCount` INTEGER NOT NULL, `page` INTEGER NOT NULL, `endpoint` INTEGER NOT NULL, PRIMARY KEY (`id`, `endpoint`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `Genre` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY (`id`))');
 
@@ -144,12 +144,9 @@ class _$MovieDao extends MovieDao {
   final InsertionAdapter<Movie> _movieInsertionAdapter;
 
   @override
-  Future<List<Movie>> fetchMovies(
-    int page,
-    MovieEndpoint endpoint,
-  ) async {
+  Future<List<Movie>> fetchMovies(MovieEndpoint endpoint) async {
     return _queryAdapter.queryList(
-        'SELECT * FROM Movie WHERE (page = ?1 AND endpoint = ?2)',
+        'SELECT * FROM Movie WHERE (endpoint = ?1) ORDER BY page',
         mapper: (Map<String, Object?> row) => Movie(
             title: row['title'] as String,
             originalTitle: row['originalTitle'] as String,
@@ -167,7 +164,7 @@ class _$MovieDao extends MovieDao {
             voteCount: row['voteCount'] as int,
             page: row['page'] as int,
             endpoint: MovieEndpoint.values[row['endpoint'] as int]),
-        arguments: [page, endpoint.index]);
+        arguments: [endpoint.index]);
   }
 
   @override
@@ -193,12 +190,9 @@ class _$MovieDao extends MovieDao {
   }
 
   @override
-  Future<List<Movie>> fetchMoviesByGenre(
-    String genre,
-    int page,
-  ) async {
+  Future<List<Movie>> fetchMoviesByGenre(String genre) async {
     return _queryAdapter.queryList(
-        'SELECT * FROM Movie WHERE ?2 > -2 AND instr(genres, ?1) > 0',
+        'SELECT * FROM Movie WHERE instr(genres, ?1) > 0 ORDER BY page',
         mapper: (Map<String, Object?> row) => Movie(
             title: row['title'] as String,
             originalTitle: row['originalTitle'] as String,
@@ -216,7 +210,7 @@ class _$MovieDao extends MovieDao {
             voteCount: row['voteCount'] as int,
             page: row['page'] as int,
             endpoint: MovieEndpoint.values[row['endpoint'] as int]),
-        arguments: [genre, page]);
+        arguments: [genre]);
   }
 
   @override

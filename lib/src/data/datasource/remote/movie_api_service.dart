@@ -43,9 +43,9 @@ class MovieApiService {
         }
       }
 
-      return movieDao.fetchMovies(page, endpoint);
+      return movieDao.fetchMovies(endpoint);
     } catch (e) {
-      return movieDao.fetchMovies(page, endpoint);
+      return movieDao.fetchMovies(endpoint);
     } finally {
       client.close();
     }
@@ -106,12 +106,10 @@ class MovieApiService {
 
       return movieDao.fetchMoviesByGenre(
         '$genre',
-        page,
       );
     } catch (e) {
       return movieDao.fetchMoviesByGenre(
         '$genre',
-        page,
       );
     } finally {
       client.close();
