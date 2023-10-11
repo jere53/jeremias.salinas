@@ -1,8 +1,6 @@
 import 'package:floor/floor.dart';
 
-import '../../core/util/enums.dart';
-
-@Entity(primaryKeys: ['id', 'endpoint'])
+@Entity()
 class Movie {
   final String title;
   final String originalTitle;
@@ -17,14 +15,12 @@ class Movie {
   final bool adult;
   final String originalLanguage;
 
+  @primaryKey
   final int id;
 
   final double popularity;
   final bool video;
   final int voteCount;
-
-  final int page;
-  final MovieEndpoint endpoint;
 
   String get score => (voteAverage * 10).toInt().toString();
 
@@ -43,17 +39,11 @@ class Movie {
     required this.popularity,
     required this.video,
     required this.voteCount,
-    required this.page,
-    required this.endpoint,
   });
 
   static const emptyString = '';
 
-  factory Movie.fromJson(
-    Map<String, dynamic> json, [
-    int page = 0,
-    MovieEndpoint endpoint = MovieEndpoint.popular,
-  ]) {
+  factory Movie.fromJson(Map<String, dynamic> json) {
     final List<int> genreIDs = List<int>.from(
       json['genre_ids'] ?? [],
     );
@@ -72,8 +62,6 @@ class Movie {
       popularity: json['popularity']?.toDouble() ?? 0.0,
       video: json['video'] ?? false,
       voteCount: json['vote_count'] ?? 0,
-      page: page,
-      endpoint: endpoint,
     );
   }
 
@@ -103,8 +91,6 @@ class Movie {
       popularity: 100,
       video: false,
       voteCount: 100000,
-      page: 1,
-      endpoint: MovieEndpoint.popular,
     );
   }
 }

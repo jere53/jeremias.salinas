@@ -15,13 +15,13 @@ import 'movie.dart';
     ),
   ],
 )
-class MoviesInEndpoint {
+class MovieInEndpoint {
   @ColumnInfo(name: 'movie_id')
   final int movieID;
 
   final MovieEndpoint endpoint;
 
-  const MoviesInEndpoint(
+  const MovieInEndpoint(
     this.movieID,
     this.endpoint,
   );

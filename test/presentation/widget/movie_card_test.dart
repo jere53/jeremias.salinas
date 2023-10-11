@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movie_app_jsalinas/src/core/util/enums.dart';
 import 'package:movie_app_jsalinas/src/domain/entity/movie.dart';
 import 'package:movie_app_jsalinas/src/presentation/widget/genre_card.dart';
 import 'package:movie_app_jsalinas/src/presentation/widget/movie_card.dart';
@@ -53,8 +52,6 @@ void main() {
       popularity: 0,
       video: false,
       voteCount: 0,
-      page: 1,
-      endpoint: MovieEndpoint.popular,
     );
 
     const movieCard = MovieCard(movie: movie);

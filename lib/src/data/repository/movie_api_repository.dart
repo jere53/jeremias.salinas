@@ -4,7 +4,6 @@ import '../../data/model/genre_model.dart';
 import '../../domain/entity/genre.dart';
 import '../../domain/entity/movie.dart';
 import '../../domain/repository/i_movie_repository.dart';
-import '../datasource/local/movie_database.dart';
 import '../datasource/remote/movie_api_service.dart';
 
 class MovieApiRepository implements IMovieRepository {

@@ -65,6 +65,8 @@ class _$MovieDatabase extends MovieDatabase {
 
   GenreDao? _genreDaoInstance;
 
+  MovieInEndpointDao? _movieInEndpointDaoInstance;
+
   Future<sqflite.Database> open(
     String path,
     List<Migration> migrations, [
@@ -87,9 +89,11 @@ class _$MovieDatabase extends MovieDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Movie` (`title` TEXT NOT NULL, `originalTitle` TEXT NOT NULL, `overview` TEXT NOT NULL, `releaseDate` TEXT NOT NULL, `voteAverage` REAL NOT NULL, `genres` TEXT NOT NULL, `pathToBackdropImg` TEXT NOT NULL, `pathToPosterImg` TEXT NOT NULL, `adult` INTEGER NOT NULL, `originalLanguage` TEXT NOT NULL, `id` INTEGER NOT NULL, `popularity` REAL NOT NULL, `video` INTEGER NOT NULL, `voteCount` INTEGER NOT NULL, `page` INTEGER NOT NULL, `endpoint` INTEGER NOT NULL, PRIMARY KEY (`id`, `endpoint`))');
+            'CREATE TABLE IF NOT EXISTS `Movie` (`title` TEXT NOT NULL, `originalTitle` TEXT NOT NULL, `overview` TEXT NOT NULL, `releaseDate` TEXT NOT NULL, `voteAverage` REAL NOT NULL, `genres` TEXT NOT NULL, `pathToBackdropImg` TEXT NOT NULL, `pathToPosterImg` TEXT NOT NULL, `adult` INTEGER NOT NULL, `originalLanguage` TEXT NOT NULL, `id` INTEGER NOT NULL, `popularity` REAL NOT NULL, `video` INTEGER NOT NULL, `voteCount` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `Genre` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, PRIMARY KEY (`id`))');
+        await database.execute(
+            'CREATE TABLE IF NOT EXISTS `MovieInEndpoint` (`movie_id` INTEGER NOT NULL, `endpoint` INTEGER NOT NULL, FOREIGN KEY (`movie_id`) REFERENCES `Movie` (`id`) ON UPDATE CASCADE ON DELETE CASCADE, PRIMARY KEY (`movie_id`, `endpoint`))');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -105,6 +109,12 @@ class _$MovieDatabase extends MovieDatabase {
   @override
   GenreDao get genreDao {
     return _genreDaoInstance ??= _$GenreDao(database, changeListener);
+  }
+
+  @override
+  MovieInEndpointDao get movieInEndpointDao {
+    return _movieInEndpointDaoInstance ??=
+        _$MovieInEndpointDao(database, changeListener);
   }
 }
 
@@ -130,9 +140,7 @@ class _$MovieDao extends MovieDao {
                   'id': item.id,
                   'popularity': item.popularity,
                   'video': item.video ? 1 : 0,
-                  'voteCount': item.voteCount,
-                  'page': item.page,
-                  'endpoint': item.endpoint.index
+                  'voteCount': item.voteCount
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -146,53 +154,15 @@ class _$MovieDao extends MovieDao {
   @override
   Future<List<Movie>> fetchMovies(MovieEndpoint endpoint) async {
     return _queryAdapter.queryList(
-        'SELECT * FROM Movie WHERE (endpoint = ?1) ORDER BY page',
-        mapper: (Map<String, Object?> row) => Movie(
-            title: row['title'] as String,
-            originalTitle: row['originalTitle'] as String,
-            overview: row['overview'] as String,
-            releaseDate: row['releaseDate'] as String,
-            voteAverage: row['voteAverage'] as double,
-            genres: _listOfIntConverter.decode(row['genres'] as String),
-            pathToBackdropImg: row['pathToBackdropImg'] as String,
-            pathToPosterImg: row['pathToPosterImg'] as String,
-            adult: (row['adult'] as int) != 0,
-            originalLanguage: row['originalLanguage'] as String,
-            id: row['id'] as int,
-            popularity: row['popularity'] as double,
-            video: (row['video'] as int) != 0,
-            voteCount: row['voteCount'] as int,
-            page: row['page'] as int,
-            endpoint: MovieEndpoint.values[row['endpoint'] as int]),
+        'SELECT * FROM Movie WHERE id IN (SELECT movie_id FROM MovieInEndpoint WHERE endpoint = ?1)',
+        mapper: (Map<String, Object?> row) => Movie(title: row['title'] as String, originalTitle: row['originalTitle'] as String, overview: row['overview'] as String, releaseDate: row['releaseDate'] as String, voteAverage: row['voteAverage'] as double, genres: _listOfIntConverter.decode(row['genres'] as String), pathToBackdropImg: row['pathToBackdropImg'] as String, pathToPosterImg: row['pathToPosterImg'] as String, adult: (row['adult'] as int) != 0, originalLanguage: row['originalLanguage'] as String, id: row['id'] as int, popularity: row['popularity'] as double, video: (row['video'] as int) != 0, voteCount: row['voteCount'] as int),
         arguments: [endpoint.index]);
-  }
-
-  @override
-  Future<List<Movie>> fetchAllMovies() async {
-    return _queryAdapter.queryList('SELECT * FROM Movie',
-        mapper: (Map<String, Object?> row) => Movie(
-            title: row['title'] as String,
-            originalTitle: row['originalTitle'] as String,
-            overview: row['overview'] as String,
-            releaseDate: row['releaseDate'] as String,
-            voteAverage: row['voteAverage'] as double,
-            genres: _listOfIntConverter.decode(row['genres'] as String),
-            pathToBackdropImg: row['pathToBackdropImg'] as String,
-            pathToPosterImg: row['pathToPosterImg'] as String,
-            adult: (row['adult'] as int) != 0,
-            originalLanguage: row['originalLanguage'] as String,
-            id: row['id'] as int,
-            popularity: row['popularity'] as double,
-            video: (row['video'] as int) != 0,
-            voteCount: row['voteCount'] as int,
-            page: row['page'] as int,
-            endpoint: MovieEndpoint.values[row['endpoint'] as int]));
   }
 
   @override
   Future<List<Movie>> fetchMoviesByGenre(String genre) async {
     return _queryAdapter.queryList(
-        'SELECT * FROM Movie WHERE instr(genres, ?1) > 0 ORDER BY page',
+        'SELECT * FROM Movie WHERE instr(genres, ?1) > 0',
         mapper: (Map<String, Object?> row) => Movie(
             title: row['title'] as String,
             originalTitle: row['originalTitle'] as String,
@@ -207,9 +177,7 @@ class _$MovieDao extends MovieDao {
             id: row['id'] as int,
             popularity: row['popularity'] as double,
             video: (row['video'] as int) != 0,
-            voteCount: row['voteCount'] as int,
-            page: row['page'] as int,
-            endpoint: MovieEndpoint.values[row['endpoint'] as int]),
+            voteCount: row['voteCount'] as int),
         arguments: [genre]);
   }
 
@@ -248,6 +216,31 @@ class _$GenreDao extends GenreDao {
   @override
   Future<void> insertGenre(Genre genre) async {
     await _genreInsertionAdapter.insert(genre, OnConflictStrategy.replace);
+  }
+}
+
+class _$MovieInEndpointDao extends MovieInEndpointDao {
+  _$MovieInEndpointDao(
+    this.database,
+    this.changeListener,
+  ) : _movieInEndpointInsertionAdapter = InsertionAdapter(
+            database,
+            'MovieInEndpoint',
+            (MovieInEndpoint item) => <String, Object?>{
+                  'movie_id': item.movieID,
+                  'endpoint': item.endpoint.index
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final InsertionAdapter<MovieInEndpoint> _movieInEndpointInsertionAdapter;
+
+  @override
+  Future<void> insertMovieInEndpoint(MovieInEndpoint movieInEndpoint) async {
+    await _movieInEndpointInsertionAdapter.insert(
+        movieInEndpoint, OnConflictStrategy.replace);
   }
 }
 

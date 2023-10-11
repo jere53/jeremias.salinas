@@ -8,16 +8,23 @@ import '../../../core/util/constants.dart' as constants;
 import '../../../core/util/enums.dart';
 import '../../../domain/entity/genre.dart';
 import '../../../domain/entity/movie.dart';
+import '../../../domain/entity/movie_in_endpoint.dart';
 import '../../model/genre_model.dart';
 import '../../model/response_model.dart';
 import '../local/DAOs/genre_dao.dart';
 import '../local/DAOs/movie_dao.dart';
+import '../local/DAOs/movie_in_endpoint_dao.dart';
 
 class MovieApiService {
   final MovieDao movieDao;
   final GenreDao genreDao;
+  final MovieInEndpointDao movieInEndpointDao;
 
-  MovieApiService({required this.movieDao, required this.genreDao});
+  MovieApiService({
+    required this.movieDao,
+    required this.genreDao,
+    required this.movieInEndpointDao,
+  });
 
   Future<List<Movie>> fetchMovies(
     int page,
@@ -35,11 +42,12 @@ class MovieApiService {
       if (response.statusCode == HttpStatus.ok) {
         final res = ResponseModel.fromJson(
           json.decode(response.body),
-          page,
-          endpoint,
         ).results;
         for (final movie in res) {
           movieDao.insertMovie(movie);
+          movieInEndpointDao.insertMovieInEndpoint(
+            MovieInEndpoint(movie.id, endpoint),
+          );
         }
       }
 
@@ -68,7 +76,7 @@ class MovieApiService {
           genreList,
         );
 
-        for(final genre in GenreModel.validGenres){
+        for (final genre in GenreModel.validGenres) {
           genreDao.insertGenre(genre);
         }
       }
@@ -99,7 +107,7 @@ class MovieApiService {
           json.decode(response.body),
         ).results;
 
-        for(final movie in res){
+        for (final movie in res) {
           movieDao.insertMovie(movie);
         }
       }

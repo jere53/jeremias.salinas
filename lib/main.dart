@@ -11,10 +11,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final database =
       await $FloorMovieDatabase.databaseBuilder('movie_database.db').build();
-  final repository = MovieApiRepository(MovieApiService(
-    movieDao: database.movieDao,
-    genreDao: database.genreDao,
-  ));
+  final repository = MovieApiRepository(
+    MovieApiService(
+      movieDao: database.movieDao,
+      genreDao: database.genreDao,
+      movieInEndpointDao: database.movieInEndpointDao,
+    ),
+  );
 
   runApp(
     MyApp(
