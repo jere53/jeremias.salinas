@@ -21,9 +21,11 @@ class MovieInEndpoint {
 
   final MovieEndpoint endpoint;
 
+  final int page;
+
   const MovieInEndpoint(
     this.movieID,
     this.endpoint,
+    this.page,
   );
-
 }

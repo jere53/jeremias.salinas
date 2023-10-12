@@ -46,14 +46,18 @@ class MovieApiService {
         for (final movie in res) {
           movieDao.insertMovie(movie);
           movieInEndpointDao.insertMovieInEndpoint(
-            MovieInEndpoint(movie.id, endpoint),
+            MovieInEndpoint(
+              movie.id,
+              endpoint,
+              page,
+            ),
           );
         }
       }
 
-      return movieDao.fetchMovies(endpoint);
+      return movieDao.fetchMovies(endpoint, page);
     } catch (e) {
-      return movieDao.fetchMovies(endpoint);
+      return movieDao.fetchMovies(endpoint, page);
     } finally {
       client.close();
     }
@@ -109,15 +113,26 @@ class MovieApiService {
 
         for (final movie in res) {
           movieDao.insertMovie(movie);
+          movieInEndpointDao.insertMovieInEndpoint(
+            MovieInEndpoint(
+              movie.id,
+              MovieEndpoint.byGenre,
+              page,
+            ),
+          );
         }
       }
 
       return movieDao.fetchMoviesByGenre(
         '$genre',
+        page,
+        MovieEndpoint.byGenre,
       );
     } catch (e) {
       return movieDao.fetchMoviesByGenre(
         '$genre',
+        page,
+        MovieEndpoint.byGenre,
       );
     } finally {
       client.close();
