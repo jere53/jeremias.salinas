@@ -4,7 +4,8 @@ enum MovieEndpoint {
   topRated(constants.endpointTopRated),
   upcoming(constants.endpointUpcoming),
   nowPlaying(constants.endpointNowPlaying),
-  popular(constants.endpointPopular);
+  popular(constants.endpointPopular),
+  byGenre('');
 
   const MovieEndpoint(this.url);
 

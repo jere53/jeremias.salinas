@@ -5,8 +5,10 @@ import 'package:file/src/backends/local/local_file.dart';
 import 'package:file/src/backends/local/local_file_system.dart';
 import 'package:file/src/interface/file.dart' show File;
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_cache_manager/src/cache_store.dart';
+import 'package:flutter_cache_manager/src/web/web_helper.dart';
 
-class TestCacheManager extends BaseCacheManager {
+class TestCacheManager implements CacheManager {
   @override
   Future<void> dispose() {
     throw UnimplementedError();
@@ -101,4 +103,10 @@ class TestCacheManager extends BaseCacheManager {
       url,
     );
   }
+
+  @override
+  CacheStore get store => throw UnimplementedError();
+
+  @override
+  WebHelper get webHelper => throw UnimplementedError();
 }

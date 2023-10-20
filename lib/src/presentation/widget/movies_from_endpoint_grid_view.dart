@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/util/function_call_when_bottom_reached.dart';
 import '../../domain/entity/movie.dart';
@@ -9,7 +10,6 @@ import 'movie_card.dart';
 
 class MoviesFromEndpointGridView extends StatefulWidget {
   final List<Movie> movies;
-  final MoviesFromEndpointBloc movieBloc;
   @override
   State<MoviesFromEndpointGridView> createState() =>
       _MoviesFromEndpointGridViewState();
@@ -17,7 +17,6 @@ class MoviesFromEndpointGridView extends StatefulWidget {
   const MoviesFromEndpointGridView({
     super.key,
     required this.movies,
-    required this.movieBloc,
   });
 }
 
@@ -25,7 +24,7 @@ class _MoviesFromEndpointGridViewState extends State<MoviesFromEndpointGridView>
     with FunctionCallWhenBottomReached {
   @override
   void onReachBottom() {
-    widget.movieBloc.fetchMovies();
+    context.read<MoviesFromEndpointBloc>().fetchMovies();
   }
 
   @override

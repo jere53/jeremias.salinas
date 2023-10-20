@@ -1,22 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../domain/entity/genre.dart';
 import '../../domain/entity/movie.dart';
-import '../../domain/usecase/implementation/movies_by_genre_usecase.dart';
-import '../../domain/usecase/implementation/valid_genres_usecase.dart';
 import '../bloc/movie_with_genre_bloc.dart';
 import '../widget/genre_drawer.dart';
 import '../widget/movies_by_genre_list_view.dart';
 
 class MoviesByGenreView extends StatefulWidget {
-  final MoviesByGenreUsecase moviesByGenreUsecase;
-  final ValidGenresUseCase validGenresUseCase;
-
-  const MoviesByGenreView({
-    super.key,
-    required this.validGenresUseCase,
-    required this.moviesByGenreUsecase,
-  });
+  const MoviesByGenreView({super.key});
 
   static const noGenreTitle = 'Null Genre';
 
@@ -25,25 +17,24 @@ class MoviesByGenreView extends StatefulWidget {
 }
 
 class _MoviesByGenreViewState extends State<MoviesByGenreView> {
-  late final MovieWithGenreBloc movieWithGenreBloc;
+  MovieWithGenreBloc? bloc;
+
 
   @override
-  void initState() {
-    movieWithGenreBloc = MovieWithGenreBloc(
-      moviesByGenreUsecase: widget.moviesByGenreUsecase,
-      validGenresUseCase: widget.validGenresUseCase,
-    );
-    super.initState();
+  void didChangeDependencies() {
+    bloc = context.watch<MovieWithGenreBloc>();
+    super.didChangeDependencies();
   }
 
   @override
   void dispose() {
-    movieWithGenreBloc.dispose();
+    bloc?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final movieWithGenreBloc = context.read<MovieWithGenreBloc>();
     final Genre? targetGenre =
         ModalRoute.of(context)?.settings.arguments as Genre?;
 
@@ -75,11 +66,18 @@ class _MoviesByGenreViewState extends State<MoviesByGenreView> {
 
             if (snapshot.hasData) {
               final List<Movie> movies = snapshot.data!;
+
+              if (movies.isEmpty) {
+                return const Center(
+                  child: Text('No Movies found'),
+                );
+              }
+
               final Widget list = MoviesByGenreListView(
                 genre: targetGenre,
                 movies: movies,
-                movieWithGenreBloc: movieWithGenreBloc,
               );
+
               return list;
             }
 

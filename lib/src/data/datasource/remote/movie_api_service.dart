@@ -8,10 +8,24 @@ import '../../../core/util/constants.dart' as constants;
 import '../../../core/util/enums.dart';
 import '../../../domain/entity/genre.dart';
 import '../../../domain/entity/movie.dart';
+import '../../../domain/entity/movie_in_endpoint.dart';
 import '../../model/genre_model.dart';
 import '../../model/response_model.dart';
+import '../local/DAOs/genre_dao.dart';
+import '../local/DAOs/movie_dao.dart';
+import '../local/DAOs/movie_in_endpoint_dao.dart';
 
 class MovieApiService {
+  final MovieDao movieDao;
+  final GenreDao genreDao;
+  final MovieInEndpointDao movieInEndpointDao;
+
+  MovieApiService({
+    required this.movieDao,
+    required this.genreDao,
+    required this.movieInEndpointDao,
+  });
+
   Future<List<Movie>> fetchMovies(
     int page,
     MovieEndpoint endpoint,
@@ -26,14 +40,24 @@ class MovieApiService {
         ),
       );
       if (response.statusCode == HttpStatus.ok) {
-        return ResponseModel.fromJson(
+        final res = ResponseModel.fromJson(
           json.decode(response.body),
         ).results;
-      } else {
-        throw Exception('Failed to fetch movies');
+        for (final movie in res) {
+          movieDao.insertMovie(movie);
+          movieInEndpointDao.insertMovieInEndpoint(
+            MovieInEndpoint(
+              movie.id,
+              endpoint,
+              page,
+            ),
+          );
+        }
       }
+
+      return movieDao.fetchMovies(endpoint, page);
     } catch (e) {
-      rethrow;
+      return movieDao.fetchMovies(endpoint, page);
     } finally {
       client.close();
     }
@@ -51,14 +75,18 @@ class MovieApiService {
         final List<Map<String, dynamic>> genreList = List.from(
           json.decode(response.body)['genres'],
         );
-        return GenreModel.validGenres = GenreModel.fromJson(
+
+        GenreModel.validGenres = GenreModel.fromJson(
           genreList,
         );
-      } else {
-        throw Exception('Failed to get genre data');
+
+        for (final genre in GenreModel.validGenres) {
+          genreDao.insertGenre(genre);
+        }
       }
+      return genreDao.fetchGenres();
     } catch (e) {
-      rethrow;
+      return genreDao.fetchGenres();
     } finally {
       client.close();
     }
@@ -79,14 +107,33 @@ class MovieApiService {
         ),
       );
       if (response.statusCode == HttpStatus.ok) {
-        return ResponseModel.fromJson(
+        final res = ResponseModel.fromJson(
           json.decode(response.body),
         ).results;
-      } else {
-        throw Exception('Failed to fetch movies by genre');
+
+        for (final movie in res) {
+          movieDao.insertMovie(movie);
+          movieInEndpointDao.insertMovieInEndpoint(
+            MovieInEndpoint(
+              movie.id,
+              MovieEndpoint.byGenre,
+              page,
+            ),
+          );
+        }
       }
+
+      return movieDao.fetchMoviesByGenre(
+        '$genre',
+        page,
+        MovieEndpoint.byGenre,
+      );
     } catch (e) {
-      rethrow;
+      return movieDao.fetchMoviesByGenre(
+        '$genre',
+        page,
+        MovieEndpoint.byGenre,
+      );
     } finally {
       client.close();
     }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import 'like_counter.dart';
 import 'movie_poster.dart';
@@ -11,10 +10,8 @@ class DetailsPosterSection extends StatelessWidget {
     required this.pathToPosterImg,
     required this.movieScore,
     required this.voteCount,
-    this.cacheManager,
   });
 
-  final BaseCacheManager? cacheManager;
   final String pathToPosterImg;
   final String movieScore;
   final int voteCount;
@@ -32,7 +29,6 @@ class DetailsPosterSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           MoviePoster(
-            cacheManager: cacheManager,
             pathToPosterImg: pathToPosterImg,
             height: posterHeight,
             width: posterWidth,

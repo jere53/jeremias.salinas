@@ -4,6 +4,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../../src/core/util/constants.dart' as constants;
 import 'genre_list.dart';
+import 'package:provider/provider.dart';
 
 class DetailsBackdropSection extends StatelessWidget {
   const DetailsBackdropSection({
@@ -11,10 +12,8 @@ class DetailsBackdropSection extends StatelessWidget {
     required this.pathToBackdropImg,
     required this.genres,
     required this.decoration,
-    this.cacheManager,
   });
 
-  final BaseCacheManager? cacheManager;
   final BoxDecoration decoration;
   final String pathToBackdropImg;
   final List<String> genres;
@@ -26,7 +25,7 @@ class DetailsBackdropSection extends StatelessWidget {
         Container(
           foregroundDecoration: decoration,
           child: CachedNetworkImage(
-            cacheManager: cacheManager ?? DefaultCacheManager(),
+            cacheManager: context.read<CacheManager>(),
             progressIndicatorBuilder: (
               context,
               url,

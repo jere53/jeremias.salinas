@@ -1,15 +1,23 @@
+import 'package:floor/floor.dart';
+
+@Entity()
 class Movie {
   final String title;
   final String originalTitle;
   final String overview;
   final String releaseDate;
   final double voteAverage;
+
   final List<int> genres;
+
   final String pathToBackdropImg;
   final String pathToPosterImg;
   final bool adult;
   final String originalLanguage;
+
+  @primaryKey
   final int id;
+
   final double popularity;
   final bool video;
   final int voteCount;
