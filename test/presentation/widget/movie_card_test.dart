@@ -1,12 +1,16 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:movie_app_jsalinas/src/domain/entity/movie.dart';
 import 'package:movie_app_jsalinas/src/presentation/widget/genre_card.dart';
 import 'package:movie_app_jsalinas/src/presentation/widget/movie_card.dart';
 import 'package:movie_app_jsalinas/src/presentation/widget/movie_poster.dart';
 import 'package:movie_app_jsalinas/src/presentation/widget/movie_score.dart';
+import 'package:provider/provider.dart';
+
+import '../../test_cache_manager.dart';
 
 class MockedMovieCard extends MovieCard {
   const MockedMovieCard({required super.movie});
@@ -22,9 +26,12 @@ void main() {
     final movie = Movie.fromStatic();
     final movieCard = MovieCard(movie: movie);
     await widgetTester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: movieCard,
+      Provider<CacheManager>(
+        create: (context) => TestCacheManager(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: movieCard,
+        ),
       ),
     );
 
@@ -56,9 +63,12 @@ void main() {
 
     const movieCard = MovieCard(movie: movie);
     await widgetTester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: movieCard,
+      Provider<CacheManager>(
+        create: (context) => TestCacheManager(),
+        child: const Directionality(
+          textDirection: TextDirection.ltr,
+          child: movieCard,
+        ),
       ),
     );
 
@@ -73,9 +83,12 @@ void main() {
     final movie = Movie.fromStatic();
     final movieCard = MockedMovieCard(movie: movie);
     await widgetTester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: movieCard,
+      Provider<CacheManager>(
+        create: (context) => TestCacheManager(),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: movieCard,
+        ),
       ),
     );
 

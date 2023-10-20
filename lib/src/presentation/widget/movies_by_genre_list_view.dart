@@ -8,10 +8,10 @@ import '../view/details_view.dart';
 import 'bottom_loader.dart';
 import 'movie_card.dart';
 
+import 'package:provider/provider.dart';
 class MoviesByGenreListView extends StatefulWidget {
   final List<Movie> movies;
   final Genre? genre;
-  final MovieWithGenreBloc movieWithGenreBloc;
 
   @override
   State<MoviesByGenreListView> createState() => _MoviesByGenreListViewState();
@@ -20,7 +20,6 @@ class MoviesByGenreListView extends StatefulWidget {
     super.key,
     required this.movies,
     required this.genre,
-    required this.movieWithGenreBloc,
   });
 }
 
@@ -34,7 +33,7 @@ class _MoviesByGenreListViewState extends State<MoviesByGenreListView>
 
   @override
   void onReachBottom() {
-    widget.movieWithGenreBloc.fetchMoviesByGenre(widget.genre?.id);
+    context.read<MovieWithGenreBloc>().fetchMoviesByGenre(widget.genre?.id);
   }
 
   @override

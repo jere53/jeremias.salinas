@@ -1,21 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../domain/entity/movie.dart';
-import '../../domain/usecase/implementation/movies_from_endpoint_usecase.dart';
-import '../../domain/usecase/implementation/valid_genres_usecase.dart';
 import '../bloc/movie_from_endpoint_bloc.dart';
 import '../widget/genre_drawer.dart';
 import '../widget/movies_from_endpoint_grid_view.dart';
 
 class MoviesView extends StatefulWidget {
-  final MoviesFromEndpointUseCase moviesUseCase;
-  final ValidGenresUseCase validGenresUseCase;
-
-  const MoviesView({
-    super.key,
-    required this.moviesUseCase,
-    required this.validGenresUseCase,
-  });
+  const MoviesView({super.key});
 
   static int amt = 0;
 
@@ -25,18 +17,16 @@ class MoviesView extends StatefulWidget {
 
 class _MoviesViewState extends State<MoviesView>
     with AutomaticKeepAliveClientMixin {
-  late final MoviesFromEndpointBloc movieBloc;
+  late MoviesFromEndpointBloc movieBloc;
 
   @override
   bool get wantKeepAlive => true;
 
+
   @override
-  void initState() {
-    movieBloc = MoviesFromEndpointBloc(
-      moviesUseCase: widget.moviesUseCase,
-      validGenresUseCase: widget.validGenresUseCase,
-    );
-    super.initState();
+  void didChangeDependencies() {
+    movieBloc = context.watch<MoviesFromEndpointBloc>();
+    super.didChangeDependencies();
   }
 
   @override
@@ -74,9 +64,15 @@ class _MoviesViewState extends State<MoviesView>
 
             if (snapshot.hasData) {
               final List<Movie> movies = snapshot.data!;
+
+              if (movies.isEmpty) {
+                return const Center(
+                  child: Text('No Movies found'),
+                );
+              }
+
               final Widget list = MoviesFromEndpointGridView(
                 movies: movies,
-                movieBloc: movieBloc,
               );
               return list;
             }

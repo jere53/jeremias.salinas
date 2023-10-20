@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:movie_app_jsalinas/src/domain/entity/movie.dart';
 import 'package:movie_app_jsalinas/src/presentation/bloc/movie_from_endpoint_bloc.dart';
 import 'package:movie_app_jsalinas/src/presentation/widget/movies_from_endpoint_grid_view.dart';
+import 'package:provider/provider.dart';
+
+import '../../test_cache_manager.dart';
 
 class MockMovieFromEndpointBloc extends Mock
     implements MoviesFromEndpointBloc {}
@@ -14,14 +18,21 @@ void main() {
   testWidgets('movie view renders a gridview when passed a list of movies',
       (tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MoviesFromEndpointGridView(
-          movies: List.generate(
-            50,
-            (index) => Movie.fromStatic(),
+      Provider<CacheManager>(
+        create: (context) => TestCacheManager(),
+        child: MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Provider<MoviesFromEndpointBloc>(
+              create: (context) => bloc,
+              child: MoviesFromEndpointGridView(
+                movies: List.generate(
+                  50,
+                  (index) => Movie.fromStatic(),
+                ),
+              ),
+            ),
           ),
-          movieBloc: bloc,
         ),
       ),
     );
@@ -34,11 +45,22 @@ void main() {
   testWidgets('movie view renders a grid view when passed an empty list',
       (tester) async {
     await tester.pumpWidget(
-      Directionality(
-        textDirection: TextDirection.ltr,
-        child: MoviesFromEndpointGridView(
-          movies: const [],
-          movieBloc: bloc,
+      Provider<CacheManager>(
+        create: (context) => TestCacheManager(),
+        child: MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MultiProvider(
+              providers: [
+                Provider<MoviesFromEndpointBloc>(
+                  create: (context) => bloc,
+                ),
+              ],
+              builder: (context, child) => const MoviesFromEndpointGridView(
+                movies: [],
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -54,14 +76,19 @@ void main() {
 
     when(() => bloc.fetchMovies()).thenAnswer((invocation) => numberOfCalls++);
     await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MoviesFromEndpointGridView(
-            movieBloc: bloc,
-            movies: List.generate(
-              50,
-              (index) => Movie.fromStatic(),
+      Provider<CacheManager>(
+        create: (context) => TestCacheManager(),
+        child: MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Provider<MoviesFromEndpointBloc>(
+              create: (context) => bloc,
+              builder: (context, child) => MoviesFromEndpointGridView(
+                movies: List.generate(
+                  50,
+                  (index) => Movie.fromStatic(),
+                ),
+              ),
             ),
           ),
         ),

@@ -3,17 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../../src/core/util/constants.dart' as constants;
-
+import 'package:provider/provider.dart';
 class MoviePoster extends StatelessWidget {
   const MoviePoster({
     super.key,
     required this.pathToPosterImg,
     required this.width,
     required this.height,
-    this.cacheManager,
   });
 
-  final BaseCacheManager? cacheManager;
   final String pathToPosterImg;
   final double width;
   final double height;
@@ -34,7 +32,7 @@ class MoviePoster extends StatelessWidget {
           width: width,
           height: height,
           child: CachedNetworkImage(
-            cacheManager: cacheManager ?? DefaultCacheManager(),
+            cacheManager: context.read<CacheManager>(),
             progressIndicatorBuilder: (
               context,
               url,

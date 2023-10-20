@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:movie_app_jsalinas/src/core/util/data_state.dart';
@@ -6,9 +7,13 @@ import 'package:movie_app_jsalinas/src/core/util/enums.dart';
 import 'package:movie_app_jsalinas/src/domain/entity/movie.dart';
 import 'package:movie_app_jsalinas/src/domain/usecase/implementation/movies_from_endpoint_usecase.dart';
 import 'package:movie_app_jsalinas/src/domain/usecase/implementation/valid_genres_usecase.dart';
+import 'package:movie_app_jsalinas/src/presentation/bloc/movie_from_endpoint_bloc.dart';
 import 'package:movie_app_jsalinas/src/presentation/view/details_view.dart';
 import 'package:movie_app_jsalinas/src/presentation/view/movies_view.dart';
 import 'package:movie_app_jsalinas/src/presentation/widget/movie_card.dart';
+import 'package:provider/provider.dart';
+
+import '../../test_cache_manager.dart';
 
 class MockMoviesUseCase extends Mock implements PopularUseCase {}
 
@@ -39,9 +44,16 @@ void main() {
       MaterialApp(
         home: Directionality(
           textDirection: TextDirection.ltr,
-          child: MoviesView(
-            moviesUseCase: moviesUseCase,
-            validGenresUseCase: genresUseCase,
+          child: MultiProvider(
+            providers: [
+              Provider<MoviesFromEndpointBloc>(
+                  create: (context) => MoviesFromEndpointBloc(
+                        moviesUseCase: moviesUseCase,
+                        validGenresUseCase: genresUseCase,
+                      )),
+              Provider<CacheManager>(create: (context) => TestCacheManager()),
+            ],
+            builder: (context, child) => const MoviesView(),
           ),
         ),
       ),
@@ -73,12 +85,22 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MoviesView(
-            moviesUseCase: moviesUseCase,
-            validGenresUseCase: genresUseCase,
+      Provider<CacheManager>(
+        create: (context) => TestCacheManager(),
+        child: MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.ltr,
+            child: MultiProvider(
+              providers: [
+                Provider<MoviesFromEndpointBloc>(
+                  create: (context) => MoviesFromEndpointBloc(
+                    moviesUseCase: moviesUseCase,
+                    validGenresUseCase: genresUseCase,
+                  ),
+                ),
+              ],
+              builder: (context, child) => const MoviesView(),
+            ),
           ),
         ),
       ),
