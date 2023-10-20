@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:provider/provider.dart';
 
 import 'src/config/route/app_routes.dart';
 import 'src/config/theme/app_themes.dart';
@@ -43,13 +45,16 @@ class MyApp extends StatelessWidget {
         .map((e) => e.call(context))
         .toList();
 
-    return MaterialApp(
-      theme: AppTheme.dark,
-      routes: appRoutes.routes,
-      home: Scaffold(
-        body: PageView(
-          controller: PageController(),
-          children: pageList,
+    return Provider<CacheManager>(
+      create: (context) => DefaultCacheManager(),
+      child: MaterialApp(
+        theme: AppTheme.dark,
+        routes: appRoutes.routes,
+        home: Scaffold(
+          body: PageView(
+            controller: PageController(),
+            children: pageList,
+          ),
         ),
       ),
     );
